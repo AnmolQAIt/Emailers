@@ -242,7 +242,7 @@ public static void main(String[] args) {
     String uname = "anmolaggarwal@qainfotech.com";
     String pswd = "Anmolkiet@18";
 	
-	 File out=new File("C:\\Users\\anmolaggarwal\\Desktop\\Test\\ABC.zip");
+	 File out=new File("C:\\Users\\anmolaggarwal\\Desktop\\Test\\ABC"+System.currentTimeMillis()+".zip");
 	 Set<String> links=check(host,mailtype,uname,pswd);
 	 for(String Unique_Link:links)
 	 new Thread(new CheckEmail(Unique_Link, out)).start();
