@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -49,7 +50,6 @@ public class CheckEmail {
 	{
 		try {
 		
-		Address match=new InternetAddress("dena.bachman@cengage.com");
 		Properties properties = new Properties();
           
 	      properties.put("mail.imaps.host", host);
@@ -70,7 +70,7 @@ public class CheckEmail {
 		      for (int i = 0; i<messages.length; i++) {
 		         Message message = messages[i];
 		         
-		         if((message.getSubject().contains("Test")))
+		         if((message.getSubject().contains("NEWTEST")))
 		         { System.out.println("---------------------------------");
 		         System.out.println(message.getContent().toString());
 		         System.out.println("Email Number " + (i+1));
@@ -104,11 +104,14 @@ public class CheckEmail {
 	}
 	
 	public static Set<String> match_regex(String str) throws Exception
-	{   BufferedWriter bw;
-	File fout = new File("C:\\Users\\anmolaggarwal\\Desktop\\Test\\out.txt");
-	FileOutputStream fos = new FileOutputStream(fout);
-	 
-	 bw = new BufferedWriter(new OutputStreamWriter(fos));
+	{   
+	File file = new File("C:\\Users\\anmol\\OneDrive\\Desktop\\MYABC\\out.txt");
+	BufferedWriter bw = null;
+    BufferedReader br=null;
+    FileReader fr=null;
+    FileWriter fw=null;
+    String line;
+	
 		 stri = new HashSet<String>();
 		Pattern pattern = Pattern.compile("https:\\/\\/(.*?).zip");   
 		Matcher matcher = pattern.matcher(str);
@@ -120,47 +123,50 @@ public class CheckEmail {
 			stri.add(str);
 			i++;
 		}
-				
-		File f=new File("C:\\Users\\anmolaggarwal\\Desktop\\Test\\out.txt");
-		if(f.createNewFile())
-	   {
-			try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-		    String line;	    
-		    while ((line = br.readLine()) != null)
-		    {
-		    for(String s:stri)
-		    {
-		    	if(s!=line)	
-		    	{ bw.newLine();
-		    		bw.write(s);	    		
-		    	}
-		    	else
-		    		stri.remove(s);
-		    		
-		    }
-		    }
-		}}
-		else
-		{
-			try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-			    String line;	    
-			    while ((line = br.readLine()) != null)
-			    {
-			    for(String s:stri)
-			    {
-			    	if(s!=line)	
-			    	{ bw.newLine();
-			    		bw.write(s);	    		
-			    	}
-			    	else
-			    		stri.remove(s);
-			    		
+						
+		try {	
+			  if (!file.exists()) 
+			  {
+			     file.createNewFile();
+			     System.out.println("New created");
+			  }
+			  
+			  else if(file.exists())
+			  {
+			  fr=new FileReader(file);
+			  br=new BufferedReader(fr);	  
+			  fw = new FileWriter(file,true);
+			  bw = new BufferedWriter(fw);
+			  
+			  while((line=br.readLine())!=null)
+			  {
+				  if(stri.contains(line))
+					  stri.remove(line);
+				  
+				  if(!stri.contains(line))
+					  continue;
+			  }
+			   for(String string:stri)
+			   {
+				   bw.write(string);
+				   bw.newLine();
+			   }
+		        System.out.println("File written Successfully");
+		        
+			  }
+
+		    } catch (IOException ioe) {
+			   ioe.printStackTrace();
+			}
+			finally
+			{ 
+			   try{
+			      if(bw!=null)
+				 bw.close();
+			   }catch(Exception ex){
+			       System.out.println("Error in closing the BufferedWriter"+ex);
 			    }
-			    }
-		}}
-		
-		  
-		    bw.close();
+			}
 		
 		System.out.println("the matching regex count is::::::::::"+i);
 		for(String s:stri)
@@ -168,7 +174,6 @@ public class CheckEmail {
 			System.out.println("The link of .zip files are ::::::::"+s);
 		}
 			return stri;
-			
 		
 	}
 	
@@ -199,32 +204,6 @@ public class CheckEmail {
 	            writePart(mp.getBodyPart(i));
 	      } 
 	      
-	    /*  else if (p.isMimeType("message/rfc822")) {
-	         System.out.println("This is a Nested Message");
-	         System.out.println("---------------------------");
-	         writePart((Part) p.getContent());
-	      } 
-	      //Now inline image
-	     else if (p.isMimeType("image/jpeg")) {
-	         System.out.println("--------> image/jpeg");
-	         Object o = p.getContent();
-
-	         InputStream x = (InputStream) o;
-	         // Construct the required byte array
-	         System.out.println("x.length = " + x.available());
-	         while ((i = (int) ((InputStream) x).available()) > 0) {
-	            int result = (int) (((InputStream) x).read(bArray));
-	            if (result == -1)
-	         int i = 0;
-	         byte[] bArray = new byte[x.available()];
-
-	            break;
-	         }
-	         FileOutputStream f2 = new FileOutputStream("/tmp/image.jpg");
-	         f2.write(bArray);
-	      } */
-	      
-	      //if image
 	      else if (p.getContentType().contains("image/")) {
 	         System.out.println("content type" + p.getContentType());
 	         File f = new File("image" + new Date().getTime() + ".jpg");
@@ -239,28 +218,7 @@ public class CheckEmail {
 	            output.write(buffer, 0, bytesRead);
 	         }
 	      } 
-	    /*  else {
-	         Object o = p.getContent();
-	         if (o instanceof String) {
-	            System.out.println("This is a string");
-	            System.out.println("---------------------------");
-	            System.out.println((String) o);
-	         } 
-	         else if (o instanceof InputStream) {
-	            System.out.println("This is just an input stream");
-	            System.out.println("---------------------------");
-	            InputStream is = (InputStream) o;
-	            is = (InputStream) o;
-	            int c;
-	            while ((c = is.read()) != -1)
-	               System.out.write(c);
-	         } 
-	         else {
-	            System.out.println("This is an unknown type");
-	            System.out.println("---------------------------");
-	            System.out.println(o.toString());
-	         }
-	      }*/
+	    
 	}
 
 public static void main(String[] args) {
@@ -270,10 +228,8 @@ public static void main(String[] args) {
     String pswd = "Anmolkiet@18";
 	
 	String name; 
-	 links=check(host,mailtype,uname,pswd);
-	 
-	runto();
-	   
+	 links=check(host,mailtype,uname,pswd);	 
+	runto();	   
 	
 }
 
@@ -283,7 +239,7 @@ public static void runto()
 	for(String newstring:links)
 	{
 	try {		
-		String name=new String("C:\\Users\\anmolaggarwal\\Desktop\\Test\\ABC"+System.currentTimeMillis()+".zip");
+		String name=new String("C:\\Users\\anmol\\OneDrive\\Desktop\\MYABC\\"+System.currentTimeMillis()+".zip");
 		  File out=new File(name); 
 		System.out.println(newstring);
 		URL url=new URL(newstring);
